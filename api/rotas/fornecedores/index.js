@@ -1,8 +1,6 @@
 const roteador = require('express').Router()
 const TabelaForn = require('./TabelaFornecedor')
 const Fornecedores = require('./Fornecedores')
-const { status } = require('express/lib/response')
-
 
 roteador.get('/', async (requisicao, resposta) =>{
     const resultados = await TabelaForn.listar()
@@ -12,7 +10,7 @@ roteador.get('/', async (requisicao, resposta) =>{
     )
 })
 
-roteador.post('/', async (requisicao, resultado) => {
+roteador.post('/', async (requisicao, resultado, proximo) => {
     try {
         const dadosRecebidos = requisicao.body
         const forncedor = new Fornecedores(dadosRecebidos)
@@ -22,16 +20,11 @@ roteador.post('/', async (requisicao, resultado) => {
             JSON.stringify(forncedor)
         )
     } catch (erro) {
-        resultado.status(400)
-        resultado.send(
-            JSON.stringify({
-                mensagem: erro.message
-            })
-        )
+        proximo(erro)
     }
 })
 
-roteador.get('/:idFornecedores', async (requisicao, resultado) => {
+roteador.get('/:idFornecedores', async (requisicao, resultado, proximo) => {
     try {
         const id = requisicao.params.idFornecedores
         const forncedor = new Fornecedores({ id: id })
@@ -42,16 +35,11 @@ roteador.get('/:idFornecedores', async (requisicao, resultado) => {
         )
     
     } catch (erro) {
-        resultado.status(404)
-        resultado.send(
-            JSON.stringify({
-                mensagem: erro.message
-            })
-        )
+        proximo(erro)
     }
 })
 
-roteador.put('/:idFornecedores', async (requisicao, resultado) => {
+roteador.put('/:idFornecedores', async (requisicao, resultado, proximo) => {
     try {
         const id = requisicao.params.idFornecedores
         const dadosRecebidos = requisicao.body
@@ -60,16 +48,9 @@ roteador.put('/:idFornecedores', async (requisicao, resultado) => {
         await forncedor.atualizar()
         resultado.status(204)
         resultado.end()
-    
     } catch (erro) {
-        resultado.status(400)
-        resultado.send(
-            JSON.stringify({
-                mensagem: erro.message
-            })
-        )
+        proximo(erro)
     }
-
 })
 
 roteador.delete('/:idFornecedores', async (requisicao, resultado) => {
